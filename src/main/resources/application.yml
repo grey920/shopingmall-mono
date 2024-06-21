@@ -10,5 +10,7 @@ spring:
         - db-local
       dev:
         - db-dev
+      test:
+        - db-test
     include:
       - db
