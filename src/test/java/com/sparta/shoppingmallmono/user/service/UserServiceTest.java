@@ -76,5 +76,18 @@ class UserServiceTest {
 
     }
 
+    @DisplayName("이메일 인증을 위한 랜덤 숫자 전송")
+    @Test
+    void sendVerificationEmail(){
+        // given
+        String email = "kyewoon@naver.com";
+
+        // when
+        userService.sendVerificationEmail(email);
+
+        //then
+
+    }
+
 
 }
