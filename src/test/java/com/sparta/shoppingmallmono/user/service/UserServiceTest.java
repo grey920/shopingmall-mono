@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,8 @@ class UserServiceTest {
     UserService userService;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired
     EncryptionUtil encryptionUtil;
 
@@ -61,6 +64,7 @@ class UserServiceTest {
                 user -> {
                     assertEquals( userSignUpRequest.getName(), user.getName() );
                     assertEquals( userSignUpRequest.getEmail(), user.getEmail() );
+                    assertTrue( passwordEncoder.matches( userSignUpRequest.getPassword(), user.getPassword() ) );
                     assertEquals( userSignUpRequest.getPhone(), encryptionUtil.decrypt( user.getPhone() ) );
                     assertEquals( userSignUpRequest.getCity(), encryptionUtil.decrypt( user.getAddress().getCity() ) );
                     assertEquals( userSignUpRequest.getStreet(), encryptionUtil.decrypt( user.getAddress().getStreet() ) );
@@ -71,8 +75,6 @@ class UserServiceTest {
             );
 
     }
-
-
 
 
 }

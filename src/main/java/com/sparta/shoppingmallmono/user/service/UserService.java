@@ -7,6 +7,7 @@ import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final EncryptionUtil encryptionUtil;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * 회원가입
@@ -32,12 +34,11 @@ public class UserService {
         isDuplicatedEmail( request.getEmail() );
 
         // 비밀번호 단방향 암호화
-        String encodedPassword = request.getPassword(); // 비밀번호 단방향 암호화
+        String encodedPassword = passwordEncoder.encode( request.getPassword() );
 
         // 요구사항 필수) 주소, 전화번호 양방향 암호화
-        String encodedPhone = encryptionUtil.encrypt( request.getPhone() ); // 전화번호 양방향 암호화
+        String encodedPhone = encryptionUtil.encrypt( request.getPhone() );
         Address encodedAddress = makeEncryptedAddress(request);
-
 
         userRepository.save( request.toEntity(encodedPassword, encodedPhone, encodedAddress) );
 
