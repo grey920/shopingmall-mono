@@ -1,0 +1,28 @@
+--- # local 설정
+spring:
+  config:
+    activate:
+      on-profile: "site-local"
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: charminggw
+    password: "cuta zely trtx fbku"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          connectiontimeout: 5000
+          writetimeout: 5000
+          starttls:
+            enable: true
+            required: true
+    auth-code-expiration-millis: 1800000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      url: jdbc:redis://localhost:6379
+      password: secret

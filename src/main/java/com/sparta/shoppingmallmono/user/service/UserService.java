@@ -2,6 +2,7 @@ package com.sparta.shoppingmallmono.user.service;
 
 import com.sparta.shoppingmallmono.message.EmailService;
 import com.sparta.shoppingmallmono.message.email.EmailRequest;
+import com.sparta.shoppingmallmono.redis.RedisUtil;
 import com.sparta.shoppingmallmono.security.EncryptionUtil;
 import com.sparta.shoppingmallmono.user.domain.entity.Address;
 import com.sparta.shoppingmallmono.user.domain.entity.User;
@@ -9,6 +10,8 @@ import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.PropertyEditorRegistrySupport;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +23,17 @@ import java.security.SecureRandom;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private static final String AUTH_CODE_PREFIX = "authCode:";
+    @Value("${spring.mail.auth-code-expiration-millis}")
+    private long authCodeExpirationMillis;
+
     private final EmailService emailService;
     private final UserRepository userRepository;
 
     private final EncryptionUtil encryptionUtil;
     private final PasswordEncoder passwordEncoder;
+    private final RedisUtil redisUtil;
+
 
 
     /**
@@ -32,11 +41,15 @@ public class UserService {
      * @param email
      */
     public void sendVerificationEmail( String email ) {
+        String authCode = createAuthCode();
         emailService.sendEmail( EmailRequest.builder()
                 .to( email )
                 .title( "회원가입 인증 코드 발급 안내" )
-                .message( "회원가입 인증 코드 : " + createAuthCode() )
+                .message( "회원가입 인증 코드 : " + authCode )
                 .build() );
+
+        // Redis에 인증 코드 저장 (key: "authCode:" + email, value: authCode, expiration: authCodeExpirationMillis)
+        redisUtil.setDataExpire( AUTH_CODE_PREFIX + email, authCode, authCodeExpirationMillis );
     }
 
     /**
