@@ -16,26 +16,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserSignUpRequest {
 
-    @NotBlank(message = "이메일은 필수 입력 값입니다.")
-    @Email(message = "이메일 형식이 올바르지 않습니다.")
+    @NotBlank( message = "이메일은 필수 입력 값입니다." )
+    @Email( message = "이메일 형식이 올바르지 않습니다." )
     private String email;
 
-    @NotBlank(message = "이름은 필수 입력 값입니다.")
+    @NotBlank( message = "이름은 필수 입력 값입니다." )
     private String name;
 
-    @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
+    @NotBlank( message = "비밀번호는 필수 입력 값입니다." )
     private String password;
 
-    @NotBlank(message = "전화번호는 필수 입력 값입니다.")
+    @NotBlank( message = "전화번호는 필수 입력 값입니다." )
     private String phone;
 
-    @NotBlank(message = "도시는 필수 입력 값입니다.")
+    @NotBlank( message = "도시는 필수 입력 값입니다." )
     private String city;
 
-    @NotBlank(message = "거리는 필수 입력 값입니다.")
+    @NotBlank( message = "거리는 필수 입력 값입니다." )
     private String street;
 
-    @NotBlank(message = "우편번호는 필수 입력 값입니다.")
+    @NotBlank( message = "우편번호는 필수 입력 값입니다." )
     private String zipcode;
 
     private char gender;
@@ -43,7 +43,7 @@ public class UserSignUpRequest {
     private boolean use2ndAuth;
 
     @Builder
-    public UserSignUpRequest(String email, String name, String password, String phone, String city, String street, String zipcode, char gender, boolean use2ndAuth) {
+    public UserSignUpRequest( String email, String name, String password, String phone, String city, String street, String zipcode, char gender, boolean use2ndAuth ) {
         this.email = email;
         this.name = name;
         this.password = password;
@@ -55,24 +55,24 @@ public class UserSignUpRequest {
         this.use2ndAuth = use2ndAuth;
     }
 
-    public User toEntity() {
+    public User toEntity( String encodedPassword, String encodedPhone, Address encodedAddress ) {
         return User.builder()
-                .email(email)
-                .name(name)
-                .password(password)
-                .phone(phone)
-                .address(toAddressEntity())
-                .use2ndAuth(use2ndAuth)
-                .gender( gender )
-                .build();
+            .email( email )
+            .name( name )
+            .password( encodedPassword )
+            .phone( encodedPhone )
+            .address( encodedAddress )
+            .use2ndAuth( use2ndAuth )
+            .gender( gender )
+            .build();
     }
 
-    public Address toAddressEntity() {
+    public Address toAddressEntity( String encodedCity, String encodedStreet, String encodedZipcode ) {
         return Address.builder()
-                .city(city)
-                .street(street)
-                .zipcode(zipcode)
-                .build();
+            .city( encodedCity )
+            .street( encodedStreet )
+            .zipcode( encodedZipcode )
+            .build();
     }
 
 

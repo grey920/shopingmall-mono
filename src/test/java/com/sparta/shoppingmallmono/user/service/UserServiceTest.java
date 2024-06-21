@@ -1,5 +1,6 @@
 package com.sparta.shoppingmallmono.user.service;
 
+import com.sparta.shoppingmallmono.security.EncryptionUtil;
 import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -18,9 +19,11 @@ class UserServiceTest {
 
     @Autowired
     UserService userService;
-
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    EncryptionUtil encryptionUtil;
+
 
     private UserSignUpRequest userSignUpRequest;
 
@@ -58,10 +61,10 @@ class UserServiceTest {
                 user -> {
                     assertEquals( userSignUpRequest.getName(), user.getName() );
                     assertEquals( userSignUpRequest.getEmail(), user.getEmail() );
-                    assertEquals( userSignUpRequest.getPhone(), user.getPhone() );
-                    assertEquals( userSignUpRequest.getCity(), user.getAddress().getCity() );
-                    assertEquals( userSignUpRequest.getStreet(), user.getAddress().getStreet() );
-                    assertEquals( userSignUpRequest.getZipcode(), user.getAddress().getZipcode() );
+                    assertEquals( userSignUpRequest.getPhone(), encryptionUtil.decrypt( user.getPhone() ) );
+                    assertEquals( userSignUpRequest.getCity(), encryptionUtil.decrypt( user.getAddress().getCity() ) );
+                    assertEquals( userSignUpRequest.getStreet(), encryptionUtil.decrypt( user.getAddress().getStreet() ) );
+                    assertEquals( userSignUpRequest.getZipcode(), encryptionUtil.decrypt( user.getAddress().getZipcode() ) );
                     assertEquals( userSignUpRequest.isUse2ndAuth(), user.isUse2ndAuth() );
                 },
                 () -> fail( "회원가입 실패" )
