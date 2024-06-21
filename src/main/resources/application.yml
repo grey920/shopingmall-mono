@@ -8,9 +8,14 @@ spring:
     group:
       local:
         - db-local
+        - site-local
       dev:
         - db-dev
       test:
         - db-test
+        - site-test
     include:
       - db
+      - site
+
+
