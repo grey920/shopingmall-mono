@@ -2,6 +2,7 @@ package com.sparta.shoppingmallmono.user.web;
 
 import com.sparta.shoppingmallmono.user.service.UserService;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
+import com.sparta.shoppingmallmono.user.web.response.EmailVerificationResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,13 @@ public class UserController {
 
         userService.sendVerificationEmail( email );
         return new ResponseEntity<>( HttpStatus.OK );
+    }
+
+    @GetMapping("/emails/verification")
+    public ResponseEntity verifyEmail( @RequestParam("email") String email, @RequestParam("code") String authCode ) {
+
+        EmailVerificationResult response = userService.verifyEmail( email, authCode );
+        return new ResponseEntity<>( response, HttpStatus.OK );
     }
 
     @PostMapping("/sign-up")

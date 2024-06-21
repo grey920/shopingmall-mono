@@ -8,6 +8,7 @@ import com.sparta.shoppingmallmono.user.domain.entity.Address;
 import com.sparta.shoppingmallmono.user.domain.entity.User;
 import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
+import com.sparta.shoppingmallmono.user.web.response.EmailVerificationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.PropertyEditorRegistrySupport;
@@ -50,6 +51,17 @@ public class UserService {
 
         // Redis에 인증 코드 저장 (key: "authCode:" + email, value: authCode, expiration: authCodeExpirationMillis)
         redisUtil.setDataExpire( AUTH_CODE_PREFIX + email, authCode, authCodeExpirationMillis );
+    }
+
+    /**
+     * 이메일 인증 코드 확인
+     * @param email
+     * @param authCode
+     */
+    public EmailVerificationResult verifyEmail( String email, String authCode ) {
+        String redisAuthCode = redisUtil.getData( AUTH_CODE_PREFIX + email );
+
+        return EmailVerificationResult.of( authCode.equals( redisAuthCode ) );
     }
 
     /**
@@ -109,5 +121,6 @@ public class UserService {
             throw new IllegalArgumentException( "인증 코드 생성 실패" );
         }
     }
+
 
 }
