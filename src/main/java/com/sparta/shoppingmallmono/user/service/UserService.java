@@ -81,9 +81,8 @@ public class UserService {
 
         // 요구사항 필수) 주소, 전화번호 양방향 암호화
         String encodedPhone = encryptionUtil.encrypt( request.getPhone() );
-        Address encodedAddress = makeEncryptedAddress(request);
 
-        userRepository.save( request.toEntity(encodedPassword, encodedPhone, encodedAddress) );
+        userRepository.save( request.toEntity(encodedPassword, encodedPhone) );
 
     }
 

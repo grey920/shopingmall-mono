@@ -29,20 +29,26 @@ public class UserSignUpRequest {
     @NotBlank( message = "전화번호는 필수 입력 값입니다." )
     private String phone;
 
-    @NotBlank( message = "도시는 필수 입력 값입니다." )
     private String city;
 
-    @NotBlank( message = "거리는 필수 입력 값입니다." )
     private String street;
 
-    @NotBlank( message = "우편번호는 필수 입력 값입니다." )
     private String zipcode;
 
-    private char gender;
+    private char gender = 'N';
 
-    private boolean use2ndAuth;
+    private boolean use2ndAuth = false;
 
-    @Builder
+    @Builder(builderMethodName = "buildEssentialUserInfo")
+    public UserSignUpRequest( String email, String name, String password, String phone ) {
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.phone = phone;
+
+    }
+
+    @Builder(builderMethodName = "buildFullUserInfo")
     public UserSignUpRequest( String email, String name, String password, String phone, String city, String street, String zipcode, char gender, boolean use2ndAuth ) {
         this.email = email;
         this.name = name;
@@ -53,6 +59,19 @@ public class UserSignUpRequest {
         this.zipcode = zipcode;
         this.gender = gender;
         this.use2ndAuth = use2ndAuth;
+    }
+
+    public User toEntity( String encodedPassword, String encodedPhone ) {
+        return User.builder()
+            .email( email )
+            .name( name )
+            .password( encodedPassword )
+            .phone( encodedPhone )
+//            .address( toAddressEntity( city, street, zipcode ) )
+            .address( Address.builder().build() )
+            .use2ndAuth( use2ndAuth )
+            .gender( gender )
+            .build();
     }
 
     public User toEntity( String encodedPassword, String encodedPhone, Address encodedAddress ) {

@@ -28,13 +28,21 @@ class UserServiceTest {
     EncryptionUtil encryptionUtil;
 
 
-    private UserSignUpRequest userSignUpRequest;
+    private UserSignUpRequest essentialUserSignUpRequest;
+    private UserSignUpRequest fullUserSignUpRequest;
 
     @BeforeEach
     void setUp() {
-        userSignUpRequest = UserSignUpRequest.builder()
+        essentialUserSignUpRequest = UserSignUpRequest.buildEssentialUserInfo()
             .name( "정겨운" )
             .email( "charminggw@gmail.com" )
+            .password( "password" )
+            .phone( "01012345678" )
+            .build();
+
+        fullUserSignUpRequest = UserSignUpRequest.buildFullUserInfo()
+            .name( "정다와" )
+            .email( "dawa@gmail.com" )
             .password( "password" )
             .phone( "01012345678" )
             .city( "서울 영등포구 커피로19길 6" )
@@ -56,20 +64,20 @@ class UserServiceTest {
         // given
 
         // when
-        userService.signUp( userSignUpRequest );
+        userService.signUp( fullUserSignUpRequest );
 
         // then
-        userRepository.findByEmail( userSignUpRequest.getEmail() )
+        userRepository.findByEmail( fullUserSignUpRequest.getEmail() )
             .ifPresentOrElse(
                 user -> {
-                    assertEquals( userSignUpRequest.getName(), user.getName() );
-                    assertEquals( userSignUpRequest.getEmail(), user.getEmail() );
-                    assertTrue( passwordEncoder.matches( userSignUpRequest.getPassword(), user.getPassword() ) );
-                    assertEquals( userSignUpRequest.getPhone(), encryptionUtil.decrypt( user.getPhone() ) );
-                    assertEquals( userSignUpRequest.getCity(), encryptionUtil.decrypt( user.getAddress().getCity() ) );
-                    assertEquals( userSignUpRequest.getStreet(), encryptionUtil.decrypt( user.getAddress().getStreet() ) );
-                    assertEquals( userSignUpRequest.getZipcode(), encryptionUtil.decrypt( user.getAddress().getZipcode() ) );
-                    assertEquals( userSignUpRequest.isUse2ndAuth(), user.isUse2ndAuth() );
+                    assertEquals( fullUserSignUpRequest.getName(), user.getName() );
+                    assertEquals( fullUserSignUpRequest.getEmail(), user.getEmail() );
+                    assertTrue( passwordEncoder.matches( fullUserSignUpRequest.getPassword(), user.getPassword() ) );
+                    assertEquals( fullUserSignUpRequest.getPhone(), encryptionUtil.decrypt( user.getPhone() ) );
+                    assertEquals( fullUserSignUpRequest.getCity(), encryptionUtil.decrypt( user.getAddress().getCity() ) );
+                    assertEquals( fullUserSignUpRequest.getStreet(), encryptionUtil.decrypt( user.getAddress().getStreet() ) );
+                    assertEquals( fullUserSignUpRequest.getZipcode(), encryptionUtil.decrypt( user.getAddress().getZipcode() ) );
+                    assertEquals( fullUserSignUpRequest.isUse2ndAuth(), user.isUse2ndAuth() );
                 },
                 () -> fail( "회원가입 실패" )
             );
