@@ -3,6 +3,7 @@ package com.sparta.shoppingmallmono.security;
 import com.sparta.shoppingmallmono.security.jwt.JWTFilter;
 import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
 import com.sparta.shoppingmallmono.security.jwt.LoginFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -43,6 +48,27 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain( HttpSecurity http) throws Exception {
+        // CORS 설정 (프론트 서버와의 통신시 LoginFiler와 같은 필터들이 CORS에 걸리지 않도록 설정. 컨트롤러단은 MvcConfig에서 설정)
+        http
+            .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+
+                @Override
+                public CorsConfiguration getCorsConfiguration( HttpServletRequest request) {
+
+                    CorsConfiguration configuration = new CorsConfiguration();
+
+                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // 허용할 Origin (프론트 서버 3000 포트)
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders( Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+
+                    configuration.setExposedHeaders(Collections.singletonList("Authorization")); // Authorization 헤더에 jwt 토큰을 넣어주기 위해 노출
+
+                    return configuration;
+                }
+            })));
+
         //csrf disable
         http
             .csrf( AbstractHttpConfigurer::disable );
