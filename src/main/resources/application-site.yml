@@ -6,8 +6,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: charminggw
-    password: "cuta zely trtx fbku"
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -25,4 +25,4 @@ spring:
       host: localhost
       port: 6379
       url: jdbc:redis://localhost:6379
-      password: secret
+      password: ${REDIS_PASSWORD}
