@@ -1,5 +1,6 @@
 package com.sparta.shoppingmallmono.security;
 
+import com.sparta.shoppingmallmono.security.jwt.JWTFilter;
 import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
 import com.sparta.shoppingmallmono.security.jwt.LoginFilter;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http
+            .addFilterBefore( jwtFilter(), LoginFilter.class ); // UsernamePasswordAuthenticationFilter 앞에 jwtFilter 추가
+        http
             .addFilterAt( loginFilter(), UsernamePasswordAuthenticationFilter.class ); // UsernamePasswordAuthenticationFilter를 커스텀한 Login Filter로 대체
 
         //세션 설정
@@ -70,6 +73,10 @@ public class SecurityConfig {
                 .sessionCreationPolicy( SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+    @Bean
+    public JWTFilter jwtFilter() {
+        return new JWTFilter( jwtUtil );
     }
     @Bean
     public LoginFilter loginFilter() throws Exception {
