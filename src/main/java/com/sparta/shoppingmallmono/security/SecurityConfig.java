@@ -1,8 +1,12 @@
 package com.sparta.shoppingmallmono.security;
 
+import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
+import com.sparta.shoppingmallmono.security.jwt.LoginFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -17,13 +21,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) //@EnableGlobalMethodSecurity 는 deprecated 되었다. @PreAuthorize, @PostAuthorize 등을 사용하기 위해 필요
+@RequiredArgsConstructor
 public class SecurityConfig {
-    public SecurityConfig( AuthenticationConfiguration authenticationConfiguration ) {
-        this.authenticationConfiguration = authenticationConfiguration;
-    }
-
-    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
+    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체, JWTUtil 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JWTUtil jwtUtil;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,7 +62,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http
-            .addFilterAt( new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class ); // UsernamePasswordAuthenticationFilter를 커스텀한 Login Filter로 대체
+            .addFilterAt( loginFilter(), UsernamePasswordAuthenticationFilter.class ); // UsernamePasswordAuthenticationFilter를 커스텀한 Login Filter로 대체
 
         //세션 설정
         http
@@ -68,12 +71,14 @@ public class SecurityConfig {
 
         return http.build();
     }
+    @Bean
+    public LoginFilter loginFilter() throws Exception {
+       return new LoginFilter( authenticationManager(authenticationConfiguration), jwtUtil );
+    }
 
     @Bean
     public WebSecurityCustomizer configure() {
-        return web -> web.ignoring()
-            .requestMatchers( PathRequest.toStaticResources().atCommonLocations() )
-            .requestMatchers( request -> request.getServletPath().equals( "/api/users/**" ) );
+        return web -> web.ignoring().requestMatchers( PathRequest.toStaticResources().atCommonLocations() );
     }
 
 }

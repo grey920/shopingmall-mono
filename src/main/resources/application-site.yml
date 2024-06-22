@@ -26,3 +26,6 @@ spring:
       port: 6379
       url: jdbc:redis://localhost:6379
       password: ${REDIS_PASSWORD}
+jwt:
+#  token-validity-in-seconds: 3600
+  secret: ${JWT_SECRET}

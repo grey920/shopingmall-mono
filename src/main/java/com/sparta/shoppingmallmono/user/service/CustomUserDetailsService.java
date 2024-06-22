@@ -21,10 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername( String username ) throws UsernameNotFoundException {
 
-        // email은 DB에 암호화되어 저장되어 있다. 따라서 입력받은 username을 암호화하여 DB에서 찾아야 한다.
-        String encryptedUsername = encryptionUtil.encrypt( username );
-
-        Optional<User> userData = userRepository.findByEmail( encryptedUsername );
+        Optional<User> userData = userRepository.findByEmail( username );
         return userData.map( CustomUserDetails::new ).orElse( null );
 
     }
