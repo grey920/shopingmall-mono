@@ -28,8 +28,10 @@ public class User extends BaseEntity {
     private char gender; // todo: enum 으로 변경
     private boolean use2ndAuth;
 
+    private String role;
+
     @Builder
-    public User( String name, String email, String password, String phone, Address address, char gender, boolean use2ndAuth ) {
+    public User( String name, String email, String password, String phone, Address address, char gender, boolean use2ndAuth, String role) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -37,5 +39,6 @@ public class User extends BaseEntity {
         this.address = address;
         this.gender = gender;
         this.use2ndAuth = use2ndAuth;
+        this.role = role;
     }
 }

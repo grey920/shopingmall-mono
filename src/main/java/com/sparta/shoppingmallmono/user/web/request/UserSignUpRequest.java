@@ -45,7 +45,6 @@ public class UserSignUpRequest {
         this.name = name;
         this.password = password;
         this.phone = phone;
-
     }
 
     @Builder(builderMethodName = "buildFullUserInfo")
@@ -67,10 +66,10 @@ public class UserSignUpRequest {
             .name( name )
             .password( encodedPassword )
             .phone( encodedPhone )
-//            .address( toAddressEntity( city, street, zipcode ) )
             .address( Address.builder().build() )
             .use2ndAuth( use2ndAuth )
             .gender( gender )
+            .role( "ROLE_USER" )
             .build();
     }
 
@@ -83,6 +82,7 @@ public class UserSignUpRequest {
             .address( encodedAddress )
             .use2ndAuth( use2ndAuth )
             .gender( gender )
+            .role( "ROLE_USER" )
             .build();
     }
 
