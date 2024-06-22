@@ -30,8 +30,9 @@ public class UserController {
     }
 
     @PostMapping("/sign-up")
-    public void signUp( @Valid @RequestBody UserSignUpRequest request ) {
+    public ResponseEntity<HttpStatus> signUp( @Valid @RequestBody UserSignUpRequest request ) {
 
         userService.signUp( request );
+        return new ResponseEntity<>( HttpStatus.CREATED );
     }
 }
