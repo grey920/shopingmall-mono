@@ -49,4 +49,8 @@ public class User extends BaseEntity {
                 .role(role)
                 .build();
     }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
 }

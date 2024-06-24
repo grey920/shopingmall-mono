@@ -1,12 +1,15 @@
 package com.sparta.shoppingmallmono.user.web;
 
 import com.sparta.shoppingmallmono.user.service.UserService;
+import com.sparta.shoppingmallmono.user.web.request.CustomUserDetails;
+import com.sparta.shoppingmallmono.user.web.request.UpdatePasswordRequest;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import com.sparta.shoppingmallmono.user.web.response.EmailVerificationResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,5 +37,17 @@ public class UserController {
 
         userService.signUp( request );
         return new ResponseEntity<>( HttpStatus.CREATED );
+    }
+
+    @GetMapping("/test")
+    public void test( @AuthenticationPrincipal CustomUserDetails user) {
+        System.out.println( "test ::: user > " + user.toString() );
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<HttpStatus> changePassword( @AuthenticationPrincipal CustomUserDetails user, @RequestBody UpdatePasswordRequest request ) {
+
+        userService.changePassword( user.getUsername(), request );
+        return new ResponseEntity<>( HttpStatus.OK );
     }
 }
