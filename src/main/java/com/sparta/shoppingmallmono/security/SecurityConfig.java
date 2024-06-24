@@ -1,5 +1,6 @@
 package com.sparta.shoppingmallmono.security;
 
+import com.sparta.shoppingmallmono.redis.RedisUtil;
 import com.sparta.shoppingmallmono.security.jwt.JWTFilter;
 import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
 import com.sparta.shoppingmallmono.security.jwt.LoginFilter;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체, JWTUtil 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final RedisUtil redisUtil;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -105,9 +107,10 @@ public class SecurityConfig {
     public JWTFilter jwtFilter() {
         return new JWTFilter( jwtUtil );
     }
+
     @Bean
     public LoginFilter loginFilter() throws Exception {
-       return new LoginFilter( authenticationManager(authenticationConfiguration), jwtUtil );
+       return new LoginFilter( authenticationManager(authenticationConfiguration), jwtUtil, redisUtil );
     }
 
     @Bean

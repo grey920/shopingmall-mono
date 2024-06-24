@@ -1,13 +1,12 @@
 package com.sparta.shoppingmallmono.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.shoppingmallmono.user.web.request.CustomUserDetails;
+import com.sparta.shoppingmallmono.redis.RedisUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,14 +17,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JWTUtil jwtUtil;
+    private final RedisUtil redisUtil;
 
-    public LoginFilter( AuthenticationManager authenticationManager, JWTUtil jwtUtil ) {
+    public LoginFilter( AuthenticationManager authenticationManager, JWTUtil jwtUtil, RedisUtil redisUtil ) {
         this.jwtUtil = jwtUtil;
+        this.redisUtil = redisUtil;
         setAuthenticationManager( authenticationManager );
         setFilterProcessesUrl( "/auth/login" ); // 필터가 작동할 경로
     }
@@ -76,6 +78,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String access = jwtUtil.createJwt( "access", username, role, 600000L ); // 10분
         String refresh = jwtUtil.createJwt( "refresh", username, role, 86400000L ); // 1일
 
+        // 리프레시 토큰 저장
+        addRefreshEntity( username, refresh, 86400000L );
+
         //응답 설정
         response.setHeader( "access", access ); // 응답 헤더에 액세스 토큰 추가
         response.addCookie( createCookie( "refresh", refresh ) ); // 응답 쿠키에 리프레시 토큰 추가
@@ -94,6 +99,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication( HttpServletRequest request, HttpServletResponse response, AuthenticationException failed ) throws IOException, ServletException {
         response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+    }
+
+    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
+
+        redisUtil.saveRefreshToken(refresh, username, expiredMs);
     }
 
     private Cookie createCookie(String key, String value) {
