@@ -85,6 +85,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/users/sign-up", "/auth/login", "/").permitAll()
+                .requestMatchers( "/auth/reissue" ).permitAll() // 액세스 토큰 만료의 경우 재발급 위해 권한 없어도 permitAll
 //                .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated());
 
