@@ -1,7 +1,11 @@
 package com.sparta.shoppingmallmono.security.jwt;
 
+import com.sparta.shoppingmallmono.user.service.CustomUserDetailsService;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,9 +21,11 @@ import java.util.Date;
 @Component
 public class JWTUtil {
     private SecretKey secretKey;
-    public JWTUtil( @Value("${jwt.secret}") String secret) {
+    private final CustomUserDetailsService customUserDetailsService;
+    public JWTUtil( @Value("${jwt.secret}") String secret, CustomUserDetailsService customUserDetailsService ) {
         // 문자열 secret 키를 객체 변수로 암호화 해서 저장
         secretKey = new SecretKeySpec(secret.getBytes( StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     //======================> JWT 토큰 검증
@@ -41,6 +47,13 @@ public class JWTUtil {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
+
+    public Authentication getAuthentication(String token) {
+        String username = getUsername(token);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername( username );
+        return new UsernamePasswordAuthenticationToken( userDetails, "", userDetails.getAuthorities() );
+    }
+
 
 
 

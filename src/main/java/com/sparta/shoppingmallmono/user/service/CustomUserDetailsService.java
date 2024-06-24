@@ -16,13 +16,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final EncryptionUtil encryptionUtil;
 
     @Override
     public UserDetails loadUserByUsername( String username ) throws UsernameNotFoundException {
 
         Optional<User> userData = userRepository.findByEmail( username );
-        return userData.map( CustomUserDetails::new ).orElse( null );
+        if ( userData.isEmpty() ) {
+            throw new UsernameNotFoundException( "User not found" );
+        }
 
+        return new CustomUserDetails( userData.get() );
     }
+
 }

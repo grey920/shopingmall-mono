@@ -7,8 +7,11 @@ import com.sparta.shoppingmallmono.security.EncryptionUtil;
 import com.sparta.shoppingmallmono.user.domain.entity.Address;
 import com.sparta.shoppingmallmono.user.domain.entity.User;
 import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
+import com.sparta.shoppingmallmono.user.web.request.UpdatePasswordRequest;
+import com.sparta.shoppingmallmono.user.web.request.UserLoginRequest;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import com.sparta.shoppingmallmono.user.web.response.EmailVerificationResult;
+import com.sparta.shoppingmallmono.user.web.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.PropertyEditorRegistrySupport;
@@ -36,6 +39,20 @@ public class UserService {
     private final RedisUtil redisUtil;
 
 
+    /**
+     * 로그인
+     * @param request
+     */
+    public UserResponse login( UserLoginRequest request ) {
+        User user = userRepository.findByEmail( request.getEmail() )
+                .orElseThrow( () -> new IllegalArgumentException( "회원 정보가 없습니다." ) );
+
+        if ( !passwordEncoder.matches( request.getPassword(), user.getPassword() ) ) {
+            throw new IllegalArgumentException( "비밀번호가 일치하지 않습니다." );
+        }
+
+        return UserResponse.of( user );
+    }
 
     /**
      * 이메일 인증 코드 전송
@@ -86,6 +103,28 @@ public class UserService {
 
     }
 
+    /**
+     * 비밀번호 변경
+     * @param email
+     * @param request
+     */
+    @Transactional
+    public void changePassword( String email, UpdatePasswordRequest request ) {
+        // 회원 조회
+        User user = userRepository.findByEmail( email )
+                .orElseThrow( () -> new IllegalArgumentException( "회원 정보가 없습니다." ) );
+
+        // 비밀번호 일치 확인
+        if ( !passwordEncoder.matches( request.getCurrentPassword(), user.getPassword() ) ) {
+            throw new IllegalArgumentException( "비밀번호가 일치하지 않습니다." );
+        }
+
+        // 새 비밀번호 단방향 암호화
+        String encodedNewPassword = passwordEncoder.encode( request.getNewPassword() );
+        user.updatePassword( encodedNewPassword );
+
+    }
+
 //    =================================================================
 
     private Address makeEncryptedAddress( UserSignUpRequest request ) {
@@ -120,6 +159,5 @@ public class UserService {
             throw new IllegalArgumentException( "인증 코드 생성 실패" );
         }
     }
-
 
 }

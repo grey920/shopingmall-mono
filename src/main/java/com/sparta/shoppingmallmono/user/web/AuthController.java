@@ -2,7 +2,9 @@ package com.sparta.shoppingmallmono.user.web;
 
 import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
 import com.sparta.shoppingmallmono.user.service.AuthService;
+import com.sparta.shoppingmallmono.user.service.UserService;
 import com.sparta.shoppingmallmono.user.web.request.UserLoginRequest;
+import com.sparta.shoppingmallmono.user.web.response.UserResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("login")
-    public String login( @Valid @RequestBody UserLoginRequest request ) {
+    public ResponseEntity<?> login( @Valid @RequestBody UserLoginRequest request ) {
 
-        return "success";
+        UserResponse response = userService.login( request );
+        return ResponseEntity.status( HttpStatus.OK ).body( response );
+
     }
 
     /**
