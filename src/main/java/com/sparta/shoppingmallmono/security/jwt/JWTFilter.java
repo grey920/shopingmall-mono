@@ -2,6 +2,7 @@ package com.sparta.shoppingmallmono.security.jwt;
 
 import com.sparta.shoppingmallmono.user.domain.entity.User;
 import com.sparta.shoppingmallmono.user.web.request.CustomUserDetails;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter { // OncePerRequestFilter: 요청당 한 번만 실행되는 필터
@@ -25,54 +27,57 @@ public class JWTFilter extends OncePerRequestFilter { // OncePerRequestFilter: �
      */
     @Override
     protected void doFilterInternal( HttpServletRequest request, HttpServletResponse response, FilterChain filterChain ) throws ServletException, IOException {
+        // 헤더에서 access키에 담긴 토큰을 꺼냄
+        String accessToken = request.getHeader( "access" ); // 헤더에 담긴 액세스 토큰을 꺼냄
 
-        //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        // 토큰이 없다면 다음 필터로 넘김 (권한이 필요없는 요청인 경우)
+        if ( accessToken == null ) {
 
-        //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            filterChain.doFilter( request, response );
 
-            System.out.println("token null");
-            filterChain.doFilter(request, response); // 다음 필터로 넘어감
-
-            //조건이 해당되면 메소드 종료 (필수)
             return;
         }
 
-        System.out.println("authorization now");
-        //Bearer 부분 제거 후 순수 토큰만 획득
-        String token = authorization.replace( "Bearer ", "" );
+        // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
+        try {
+            jwtUtil.isExpired( accessToken );
+        }
+        catch ( ExpiredJwtException e ) { // 만료되면 ExpiredJwtException 발생
 
-        //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
+            //response body
+            PrintWriter writer = response.getWriter();
+            writer.print( "access token expired" );
 
-            System.out.println("token expired");
-            filterChain.doFilter(request, response);
-
-            //조건이 해당되면 메소드 종료 (필수)
+            //response status code [중요] 다음 필터로 넘기지 않음
+            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
             return;
         }
 
-        //토큰에서 username과 role 획득
-        String username = jwtUtil.getUsername(token);
-        String role = jwtUtil.getRole(token);
+        // 토큰이 access인지 확인 (발급시 페이로드에 명시).
+        String category = jwtUtil.getCategory( accessToken );
 
-        //user 엔티티를 생성하여 값 set
-        User user = User.builder()
-            .email( username )
-            .password( "temppassword" ) // 토큰에 X지만 같이 초기화해준다. (토큰에는 패스워드가 없기 때문) -> 따라서 정확한 패스워드 필요 X
-            .role( role )
-            .build();
+        if ( !category.equals( "access" ) ) { // 다음 필터로 넘기지 않음
 
-        //UserDetails에 회원 정보 객체 담기
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+            //response body
+            PrintWriter writer = response.getWriter();
+            writer.print( "invalid access token" );
 
-        //스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        //세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+            //response status code
+            response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+            return;
+        }
 
-        filterChain.doFilter(request, response);
+        // username, role 값을 획득
+        String username = jwtUtil.getUsername( accessToken );
+        String role = jwtUtil.getRole( accessToken );
 
+        User user = new User();
+        user.createForUserDetails( username, role );// User 객체 생성
+        CustomUserDetails customUserDetails = new CustomUserDetails( user );
+
+        Authentication authToken = new UsernamePasswordAuthenticationToken( customUserDetails, null, customUserDetails.getAuthorities() );
+        SecurityContextHolder.getContext().setAuthentication( authToken );
+
+        filterChain.doFilter( request, response );
     }
 }

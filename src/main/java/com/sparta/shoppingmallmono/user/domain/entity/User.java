@@ -1,6 +1,7 @@
 package com.sparta.shoppingmallmono.user.domain.entity;
 
 import com.sparta.shoppingmallmono.common.BaseEntity;
+import com.sparta.shoppingmallmono.user.web.request.CustomUserDetails;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class User extends BaseEntity {
 
     @Id
@@ -40,5 +41,12 @@ public class User extends BaseEntity {
         this.gender = gender;
         this.use2ndAuth = use2ndAuth;
         this.role = role;
+    }
+
+    public User createForUserDetails(String email, String role) {
+        return User.builder()
+                .email(email)
+                .role(role)
+                .build();
     }
 }
