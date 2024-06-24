@@ -139,13 +139,17 @@ public class UserService {
                 .orElseThrow( () -> new IllegalArgumentException( "회원 정보가 없습니다." ) );
 
         // 주소 암호화 후 업데이트
-        Address address = Optional.ofNullable( user.getAddress() ).orElse( new Address() );
-        address.updateAddress( makeEncryptedAddress( request.getCity(), request.getStreet(), request.getZipcode() ) );
-        user.updateAddress( address );
+        if ( request.getCity() != null || request.getStreet() != null || request.getZipcode() != null ) {
+            Address address = Optional.ofNullable( user.getAddress() ).orElse( new Address() );
+            address.updateAddress( makeEncryptedAddress( request.getCity(), request.getStreet(), request.getZipcode() ) );
+            user.updateAddress( address );
+        }
 
-        // 전화번호 암호화 후 업데이트
-        String encodedPhone = encryptionUtil.encrypt( request.getPhone() );
-        user.updatePhone( encodedPhone );
+        if ( request.getPhone() != null ) {
+            // 전화번호 암호화 후 업데이트
+            String encodedPhone = encryptionUtil.encrypt( request.getPhone() );
+            user.updatePhone( encodedPhone );
+        }
     }
 
 //    =================================================================
