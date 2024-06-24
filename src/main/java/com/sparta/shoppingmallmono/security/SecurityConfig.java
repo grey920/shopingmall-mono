@@ -1,6 +1,7 @@
 package com.sparta.shoppingmallmono.security;
 
 import com.sparta.shoppingmallmono.redis.RedisUtil;
+import com.sparta.shoppingmallmono.security.jwt.CustomLogoutFilter;
 import com.sparta.shoppingmallmono.security.jwt.JWTFilter;
 import com.sparta.shoppingmallmono.security.jwt.JWTUtil;
 import com.sparta.shoppingmallmono.security.jwt.LoginFilter;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -95,6 +97,8 @@ public class SecurityConfig {
             .addFilterBefore( jwtFilter(), LoginFilter.class ); // UsernamePasswordAuthenticationFilter 앞에 jwtFilter 추가
         http
             .addFilterAt( loginFilter(), UsernamePasswordAuthenticationFilter.class ); // UsernamePasswordAuthenticationFilter를 커스텀한 Login Filter로 대체
+        http
+            .addFilterBefore( new CustomLogoutFilter( jwtUtil, redisUtil ), LogoutFilter.class ); // LogoutFilter 앞에 커스텀한 CustomLogoutFilter 추가
 
         //세션 설정
         http
