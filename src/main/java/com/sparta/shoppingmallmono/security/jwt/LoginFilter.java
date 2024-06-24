@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.shoppingmallmono.user.web.request.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,21 +37,24 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         UsernamePasswordAuthenticationToken authToken = null;
         try {
             // JSON 데이터를 Map으로 파싱
-            Map<String, String> credentials = mapper.readValue(request.getInputStream(), Map.class);
-            String username = credentials.get("email");
-            String password = credentials.get("password");
+            Map< String, String > credentials = mapper.readValue( request.getInputStream(), Map.class );
+            String username = credentials.get( "email" );
+            String password = credentials.get( "password" );
 
 
-            authToken = new UsernamePasswordAuthenticationToken(username, password);
-        } catch (IOException e) {
-            throw new AuthenticationException("Error parsing authentication request body") {};
+            authToken = new UsernamePasswordAuthenticationToken( username, password );
+        }
+        catch ( IOException e ) {
+            throw new AuthenticationException( "Error parsing authentication request body" ) {
+            };
         }
 
-        return getAuthenticationManager().authenticate(authToken);
+        return getAuthenticationManager().authenticate( authToken );
     }
 
     /**
      * 인증(로그인) 성공시
+     *
      * @param request
      * @param response
      * @param chain
@@ -59,26 +64,27 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
      */
     @Override
     protected void successfulAuthentication( HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication ) throws IOException, ServletException {
+        //유저 정보
+        String username = authentication.getName();
 
-        CustomUserDetails customUserDetails = ( CustomUserDetails ) authentication.getPrincipal();
-
-        String username = customUserDetails.getUsername();
-
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        Collection< ? extends GrantedAuthority > authorities = authentication.getAuthorities();
+        Iterator< ? extends GrantedAuthority > iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String role = auth.getAuthority();
 
-        // 추출한 유저 정보를 통해 토큰 생성
-        String token = jwtUtil.createJwt(username, role, 60*60*10L);
+        //토큰 생성
+        String access = jwtUtil.createJwt( "access", username, role, 600000L ); // 10분
+        String refresh = jwtUtil.createJwt( "refresh", username, role, 86400000L ); // 1일
 
-        // 토큰을 응답 헤더에 담아서 보냄 (RFC 7235 규격에 따라)
-        response.addHeader("Authorization", "Bearer " + token);
+        //응답 설정
+        response.setHeader( "access", access ); // 응답 헤더에 액세스 토큰 추가
+        response.addCookie( createCookie( "refresh", refresh ) ); // 응답 쿠키에 리프레시 토큰 추가
+        response.setStatus( HttpStatus.OK.value() ); // 응답 상태 코드 200
     }
 
     /**
      * 인증 실패시
+     *
      * @param request
      * @param response
      * @param failed
@@ -88,5 +94,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication( HttpServletRequest request, HttpServletResponse response, AuthenticationException failed ) throws IOException, ServletException {
         response.setStatus( HttpServletResponse.SC_UNAUTHORIZED );
+    }
+
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60); // 쿠키 생명주기 1일
+        //cookie.setSecure(true); // SSL 통신이면
+        //cookie.setPath("/"); // 모든 경로에서 접근 가능하도록
+        cookie.setHttpOnly(true); // JS에서 접근 불가
+
+        return cookie;
     }
 }
