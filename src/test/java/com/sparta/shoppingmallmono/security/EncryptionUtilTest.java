@@ -29,4 +29,17 @@ class EncryptionUtilTest {
 
     }
 
+    @DisplayName("")
+    @Test
+    void decryptTest(){
+        // given
+        String encrypted = "uxlQlWnMNBb1Tf1sKBWNxA4UFeFfh7oC";
+
+        // when
+        String decrypted = encryptionUtil.decrypt(encrypted);
+
+        //then
+        System.out.println("decrypted = " + decrypted);
+    }
+
 }

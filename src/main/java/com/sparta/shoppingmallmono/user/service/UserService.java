@@ -8,6 +8,7 @@ import com.sparta.shoppingmallmono.user.domain.entity.Address;
 import com.sparta.shoppingmallmono.user.domain.entity.User;
 import com.sparta.shoppingmallmono.user.domain.repository.UserRepository;
 import com.sparta.shoppingmallmono.user.web.request.UpdatePasswordRequest;
+import com.sparta.shoppingmallmono.user.web.request.UpdateUserProfileRequest;
 import com.sparta.shoppingmallmono.user.web.request.UserLoginRequest;
 import com.sparta.shoppingmallmono.user.web.request.UserSignUpRequest;
 import com.sparta.shoppingmallmono.user.web.response.EmailVerificationResult;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -125,14 +127,39 @@ public class UserService {
 
     }
 
+    /**
+     * 프로필 수정
+     * @param email
+     * @param request
+     */
+    @Transactional
+    public void updateProfile( String email, UpdateUserProfileRequest request ) {
+        // 회원 조회
+        User user = userRepository.findByEmail( email )
+                .orElseThrow( () -> new IllegalArgumentException( "회원 정보가 없습니다." ) );
+
+        // 주소 암호화 후 업데이트
+        Address address = Optional.ofNullable( user.getAddress() ).orElse( new Address() );
+        address.updateAddress( makeEncryptedAddress( request.getCity(), request.getStreet(), request.getZipcode() ) );
+        user.updateAddress( address );
+
+        // 전화번호 암호화 후 업데이트
+        String encodedPhone = encryptionUtil.encrypt( request.getPhone() );
+        user.updatePhone( encodedPhone );
+    }
+
 //    =================================================================
 
-    private Address makeEncryptedAddress( UserSignUpRequest request ) {
-        String encodedCity = encryptionUtil.encrypt( request.getCity() ); // 도시 양방향 암호화
-        String encodedStreet = encryptionUtil.encrypt( request.getStreet() ); // 거리 양방향 암호화
-        String encodedZipcode = encryptionUtil.encrypt( request.getZipcode() ); // 우편번호 양방향 암호화
+    private Address makeEncryptedAddress( String city, String street, String zipcode ) {
+        String encodedCity = encryptionUtil.encrypt( city ); // 도시 양방향 암호화
+        String encodedStreet = encryptionUtil.encrypt( street ); // 거리 양방향 암호화
+        String encodedZipcode = encryptionUtil.encrypt( zipcode ); // 우편번호 양방향 암호화
 
-        return request.toAddressEntity(encodedCity, encodedStreet, encodedZipcode);
+        return Address.builder()
+                .city( encodedCity )
+                .street( encodedStreet )
+                .zipcode( encodedZipcode )
+                .build();
 
     }
 

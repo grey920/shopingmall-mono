@@ -15,4 +15,10 @@ public class Address {
     private String city;
     private String street;
     private String zipcode;
+
+    public void updateAddress( Address address ) {
+        this.city = address.getCity();
+        this.street = address.getStreet();
+        this.zipcode = address.getZipcode();
+    }
 }
