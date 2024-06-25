@@ -5,15 +5,17 @@ import com.sparta.shoppingmallmono.product.brand.repository.BrandRepository;
 import com.sparta.shoppingmallmono.product.product.entity.Product;
 import com.sparta.shoppingmallmono.product.product.service.ProductService;
 import com.sparta.shoppingmallmono.product.product.service.dto.ProductDetailDTO;
+import com.sparta.shoppingmallmono.product.product.service.dto.ProductListResponseDTO;
 import com.sparta.shoppingmallmono.product.stock.entity.Stock;
 import com.sparta.shoppingmallmono.product.product.repository.ProductRepository;
 import com.sparta.shoppingmallmono.product.stock.repository.StockRepository;
 import com.sparta.shoppingmallmono.product.product.service.dto.ProductDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,18 +36,19 @@ public class BasicProductService implements ProductService {
             throw new IllegalArgumentException( "상품 정보가 없습니다." );
         }
 
-        Brand brandInfo = brandRepository.findById( productDTO.getBrandId() )
+        Brand brand = brandRepository.findById( productDTO.getBrandId() )
             .orElseThrow( () -> new IllegalArgumentException( "브랜드 정보가 없습니다." ) );
 
         Product product = productDTO.toProductEntity();
         Stock stock = productDTO.toStockEntity();
 
         product.setStock( stock );
+        product.setBrand( brand );
 
         Product savedProduct = productRepository.save( product );
         stockRepository.save( stock );
 
-        return ProductDetailDTO.of( savedProduct, brandInfo );
+        return ProductDetailDTO.of( savedProduct );
     }
 
     @Override
@@ -53,11 +56,18 @@ public class BasicProductService implements ProductService {
         Product product = productRepository.findById( id )
             .orElseThrow( () -> new IllegalArgumentException( "상품 정보가 없습니다." ) );
 
+        return ProductDetailDTO.of( product );
+    }
 
-        Brand brand = brandRepository.findById( product.getBrandId() )
-            .orElseThrow( () -> new IllegalArgumentException( "브랜드 정보가 없습니다." ) );
+    @Override
+    public ProductListResponseDTO getProductList( Pageable pageable ) {
+        Page< Product > productList = productRepository.findAll( pageable );
 
-        return ProductDetailDTO.of( product, brand );
+
+        productList.getContent().forEach( product -> {
+        } );
+
+        return null;
     }
 
 
