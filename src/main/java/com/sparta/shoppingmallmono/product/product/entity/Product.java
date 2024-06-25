@@ -1,5 +1,6 @@
 package com.sparta.shoppingmallmono.product.product.entity;
 
+import com.sparta.shoppingmallmono.product.stock.entity.Stock;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,9 @@ public class Product {
     @ElementCollection
     @CollectionTable(name = "product_detail_images", joinColumns = @JoinColumn(name = "product_id"))
     private List<String> detailImages;
+
+    @Setter
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Stock stock;
 
 }
