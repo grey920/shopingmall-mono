@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -17,15 +18,13 @@ public class Product {
     @GeneratedValue
     private UUID id;
     private String title;
-    private int price;
     private UUID brandId;
+    private int price;
+    @Column(precision = 5)
+    private int discountRate;
+
     private String description;
-
-    @Column(precision = 5, scale = 2)
-    private double discountRate;
-
     private String thumbnailImage;
-
     @ElementCollection
     @CollectionTable(name = "product_detail_images", joinColumns = @JoinColumn(name = "product_id"))
     private List<String> detailImages;
