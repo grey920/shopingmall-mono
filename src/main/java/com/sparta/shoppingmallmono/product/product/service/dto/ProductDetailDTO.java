@@ -30,7 +30,7 @@ public class ProductDetailDTO {
     private UUID brandId;
     private String brandName;
 
-    public static ProductDetailDTO of ( Product product, Brand  brand ) {
+    public static ProductDetailDTO of ( Product product ) {
         return ProductDetailDTO.builder()
             .productId( product.getId() )
             .title( product.getTitle() )
@@ -43,8 +43,8 @@ public class ProductDetailDTO {
             .stockId( product.getStock().getId() )
             .quantity( product.getStock().getQuantity() )
             .exposedQuantity( product.getStock().getExposedQuantity() )
-            .brandId( brand.getId() )
-            .brandName( brand.getName() )
+            .brandId( product.getBrand().getId() )
+            .brandName( product.getBrand().getName() )
             .build();
     }
 }

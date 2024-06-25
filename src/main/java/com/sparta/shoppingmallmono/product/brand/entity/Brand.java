@@ -1,10 +1,10 @@
 package com.sparta.shoppingmallmono.product.brand.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.sparta.shoppingmallmono.product.product.entity.Product;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -19,4 +19,7 @@ public class Brand {
     private UUID id;
 
     private String name;
+
+    @OneToMany(mappedBy = "brand", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List< Product > productList;
 }

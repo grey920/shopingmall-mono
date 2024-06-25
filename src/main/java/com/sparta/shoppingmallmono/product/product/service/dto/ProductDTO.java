@@ -34,7 +34,6 @@ public class ProductDTO {
     public Product toProductEntity() {
         return Product.builder()
                 .title(title)
-                .brandId(brandId)
                 .price(price)
                 .discountRate(discountRate)
                 .description(description)

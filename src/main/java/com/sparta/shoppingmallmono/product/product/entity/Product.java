@@ -1,5 +1,6 @@
 package com.sparta.shoppingmallmono.product.product.entity;
 
+import com.sparta.shoppingmallmono.product.brand.entity.Brand;
 import com.sparta.shoppingmallmono.product.stock.entity.Stock;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,9 @@ public class Product {
     @JoinColumn(name = "stock_id")
     private Stock stock;
 
-    private UUID brandId;
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
 
 }
