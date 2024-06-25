@@ -1,4 +1,4 @@
-package com.sparta.shoppingmallmono.product.entity;
+package com.sparta.shoppingmallmono.product.stock.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

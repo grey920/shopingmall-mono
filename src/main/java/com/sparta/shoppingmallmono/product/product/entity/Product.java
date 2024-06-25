@@ -1,4 +1,4 @@
-package com.sparta.shoppingmallmono.product.entity;
+package com.sparta.shoppingmallmono.product.product.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

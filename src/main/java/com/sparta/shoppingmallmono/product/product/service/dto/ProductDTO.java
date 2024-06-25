@@ -1,7 +1,7 @@
-package com.sparta.shoppingmallmono.product.service.dto;
+package com.sparta.shoppingmallmono.product.product.service.dto;
 
-import com.sparta.shoppingmallmono.product.entity.Product;
-import com.sparta.shoppingmallmono.product.entity.Stock;
+import com.sparta.shoppingmallmono.product.product.entity.Product;
+import com.sparta.shoppingmallmono.product.stock.entity.Stock;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
