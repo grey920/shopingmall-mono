@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,31 +36,29 @@ public class BasicProductService implements ProductService {
 
         Brand brandInfo = brandRepository.findById( productDTO.getBrandId() )
             .orElseThrow( () -> new IllegalArgumentException( "브랜드 정보가 없습니다." ) );
-        Product savedProduct = productRepository.save( productDTO.toProductEntity() );
-        Stock savedStock = stockRepository.save( productDTO.toStockEntity() );
 
-        return ProductDetailDTO.builder()
-                .productId( savedProduct.getId() )
-                .title( savedProduct.getTitle() )
-                .price( savedProduct.getPrice() )
-                .discountRate( savedProduct.getDiscountRate() )
-                .description( savedProduct.getDescription() )
-                .thumbnailImage( savedProduct.getThumbnailImage() )
-                .detailImages( savedProduct.getDetailImages() )
+        Product product = productDTO.toProductEntity();
+        Stock stock = productDTO.toStockEntity();
 
-                .stockId( savedStock.getId() )
-                .quantity( savedStock.getQuantity() )
-                .exposedQuantity( savedStock.getExposedQuantity() )
-                .brandId( savedProduct.getBrandId() )
-                .brandName( brandInfo.getName() )
-                .build();
+        product.setStock( stock );
+
+        Product savedProduct = productRepository.save( product );
+        stockRepository.save( stock );
+
+        return ProductDetailDTO.of( savedProduct, brandInfo );
     }
 
     @Override
-    public ProductDetailDTO getProduct( Long id ) {
-        return null;
-    }
+    public ProductDetailDTO getProduct( UUID id ) {
+        Product product = productRepository.findById( id )
+            .orElseThrow( () -> new IllegalArgumentException( "상품 정보가 없습니다." ) );
 
+
+        Brand brand = brandRepository.findById( product.getBrandId() )
+            .orElseThrow( () -> new IllegalArgumentException( "브랜드 정보가 없습니다." ) );
+
+        return ProductDetailDTO.of( product, brand );
+    }
 
 
 }

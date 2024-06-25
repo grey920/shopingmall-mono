@@ -15,7 +15,10 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class ProductDTO {
-    private UUID id;
+    private UUID productId;
+    private UUID stockId;
+
+
     @NotBlank
     private String title;
     private int price;

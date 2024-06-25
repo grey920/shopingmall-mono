@@ -19,7 +19,6 @@ public class Product {
     @GeneratedValue
     private UUID id;
     private String title;
-    private UUID brandId;
     private int price;
     @Column(precision = 5)
     private int discountRate;
@@ -31,7 +30,10 @@ public class Product {
     private List<String> detailImages;
 
     @Setter
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "stock_id")
     private Stock stock;
+
+    private UUID brandId;
 
 }
