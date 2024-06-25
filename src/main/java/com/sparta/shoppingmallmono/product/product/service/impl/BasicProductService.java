@@ -1,10 +1,11 @@
-package com.sparta.shoppingmallmono.product.service.impl;
+package com.sparta.shoppingmallmono.product.product.service.impl;
 
-import com.sparta.shoppingmallmono.product.entity.Product;
-import com.sparta.shoppingmallmono.product.entity.Stock;
-import com.sparta.shoppingmallmono.product.repository.ProductRepository;
-import com.sparta.shoppingmallmono.product.repository.StockRepository;
-import com.sparta.shoppingmallmono.product.service.dto.ProductDTO;
+import com.sparta.shoppingmallmono.product.product.entity.Product;
+import com.sparta.shoppingmallmono.product.product.service.ProductService;
+import com.sparta.shoppingmallmono.product.stock.entity.Stock;
+import com.sparta.shoppingmallmono.product.product.repository.ProductRepository;
+import com.sparta.shoppingmallmono.product.stock.repository.StockRepository;
+import com.sparta.shoppingmallmono.product.product.service.dto.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BasicProductService {
+public class BasicProductService implements ProductService {
     private final ProductRepository productRepository;
     private final StockRepository stockRepository;
 
