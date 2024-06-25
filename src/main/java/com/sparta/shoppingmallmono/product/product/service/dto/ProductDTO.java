@@ -15,20 +15,18 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class ProductDTO {
-
+    private UUID id;
     @NotBlank
     private String title;
-    @NotNull
-    private UUID brandId;
     private int price;
     private int discountRate;
     private String description;
-
     private String thumbnailImage;
-
     private List<String> detailImages;
 
     private int quantity;
+    @NotNull
+    private UUID brandId;
 
     public Product toProductEntity() {
         return Product.builder()
