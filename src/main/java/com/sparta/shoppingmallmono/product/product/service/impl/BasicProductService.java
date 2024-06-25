@@ -16,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,13 +63,24 @@ public class BasicProductService implements ProductService {
 
     @Override
     public ProductListResponseDTO getProductList( Pageable pageable ) {
-        Page< Product > productList = productRepository.findAll( pageable );
+        Page< Product > productList = productRepository.findAllWithStockAndBrand( pageable );
+
+        List< ProductDTO > productDTOList = productList.getContent().stream()
+            .map( product -> ProductDTO.builder()
+                .productId( product.getId() )
+                .stockId( product.getStock().getId() )
+                .title( product.getTitle() )
+                .price( product.getPrice() )
+                .discountRate( product.getDiscountRate() )
+                .thumbnailImage( product.getThumbnailImage() )
+                .detailImages( product.getDetailImages() )
+                .quantity( product.getStock().getQuantity() )
+                .brandId( product.getBrand().getId() )
+                .build() )
+            .collect( Collectors.toList() );
 
 
-        productList.getContent().forEach( product -> {
-        } );
-
-        return null;
+        return new ProductListResponseDTO( productDTOList, productList.getTotalPages(), pageable.getPageNumber() );
     }
 
 

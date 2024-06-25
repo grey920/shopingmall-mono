@@ -5,11 +5,14 @@ import com.sparta.shoppingmallmono.product.brand.service.dto.BrandDTO;
 import com.sparta.shoppingmallmono.product.product.service.ProductService;
 import com.sparta.shoppingmallmono.product.product.service.dto.ProductDTO;
 import com.sparta.shoppingmallmono.product.product.service.dto.ProductDetailDTO;
+import com.sparta.shoppingmallmono.product.product.service.dto.ProductListResponseDTO;
 import com.sparta.shoppingmallmono.product.stock.entity.Stock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +60,28 @@ class BasicProductServiceTest {
 
         System.out.println( "found = " + found );
     }
+
+    @DisplayName( "상품 목록 조회 테스트" )
+    @Test
+    void getProductList() {
+        // given
+        BrandDTO brand = brandService.createBrand( getBrandDTO( "sample brand" ) ); // 브랜드 생성
+        ProductDTO productDTO = getSampleProductDTO( brand );
+        ProductDetailDTO saved = productService.createProduct( productDTO ); // 상품 생성
+
+        // when
+        ProductListResponseDTO found = productService.getProductList( PageRequest.of( 0, 10 ) );
+
+        // then
+        found.getProductList().forEach( System.out::println );
+        assertThat( found ).isNotNull();
+        assertThat( found.getProductList().size() ).isEqualTo( 1 );
+        assertThat( found.getProductList().getFirst().getTitle() ).isEqualTo( productDTO.getTitle() );
+        assertThat( found.getProductList().getFirst().getQuantity() ).isEqualTo( saved.getQuantity() );
+
+    }
+
+
 
     //    ======================================================================
     private static BrandDTO getBrandDTO( String name ) {
