@@ -19,16 +19,6 @@ public class Stock {
     private int exposedQuantity;
     private int soldQuantity;
 
-    @OneToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-
-    public void setProduct(Product product) {
-        this.product = product;
-        product.setStock(this); // 양방향 설정
-    }
-
-
     private void setExposedQuantity( int quantity ) {
         this.exposedQuantity = calcExposedQuantity(quantity);
     }

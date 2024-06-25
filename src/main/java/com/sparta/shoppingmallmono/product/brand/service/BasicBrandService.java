@@ -17,8 +17,8 @@ public class BasicBrandService implements BrandService{
 
     @Transactional
     @Override
-    public BrandDTO createBrand( String name ) {
-        Brand saved = brandRepository.save( Brand.builder().name( name ).build() );
+    public BrandDTO createBrand( BrandDTO dto ) {
+        Brand saved = brandRepository.save( dto.toEntity() );
         return BrandDTO.of( saved );
     }
 
